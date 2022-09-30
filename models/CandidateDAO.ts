@@ -1,4 +1,4 @@
-import db from '../connect';
+import db from './connect';
 import { QueryResult } from 'pg';
 import IModel from './IModel';
 import Candidate from './Candidate';
@@ -10,7 +10,7 @@ enum Query {
 	DELETE = "DELETE FROM Candidates WHERE digit = $1"
 };
 
-class CandidateModel extends Candidate implements IModel {
+class CandidateDAO extends Candidate implements IModel {
 	constructor(){
 		super();
 	}
@@ -81,4 +81,4 @@ class CandidateModel extends Candidate implements IModel {
 	}
 }
 
-export default CandidateModel;
+export default CandidateDAO;

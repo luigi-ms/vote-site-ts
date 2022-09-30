@@ -1,16 +1,16 @@
-import db from '../connect';
+import db from './connect';
 import { QueryResult } from 'pg';
 import IModel from './IModel';
-import Party from './Party';
+import Position from './Position';
 
 enum Query {
-	INSERT = "INSERT INTO Parties(fullname, initials) VALUES($1, $2)",
-	SELECT = "SELECT initials, fullname FROM Parties WHERE id = $1",
-	UPDATE = "UPDATE Parties SET $1 = $2 WHERE id = $3",
-	DELETE = "DELETE FROM Parties WHERE id = $1"
+	INSERT = "INSERT INTO Positions(title) VALUES($1)",
+	SELECT = "SELECT id, title FROM Positions WHERE id = $1",
+	UPDATE = "UPDATE Positions SET $1 =$2 WHERE id = $3",
+	DELETE = "DELETE FROM Positions WHERE id = $1"
 };
 
-class PartyModel extends Party implements IModel {
+class PositionDAO extends Position implements IModel {
 	constructor(){
 		super();
 	}
@@ -18,12 +18,12 @@ class PartyModel extends Party implements IModel {
 	public async insert(): Promise<QueryResult | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
-				[this.fullName, this.initials]);
+				[this.title]);
 			return res;
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during insert Party");
+				: new Error("Some Error during insert Position");
 		}
 	}
 
@@ -35,16 +35,16 @@ class PartyModel extends Party implements IModel {
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during select Party");
+				: new Error("Some Error during select Position");
 		}
 	}
 
 	public async update(field: string, newValue: any): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
-			return new Error("This Party doesnt exist");
+			return new Error("This Position doesnt exist");
 		}
 
-		if((field !== "id") && (field !== "fullname") && (field !== "initials")){
+		if(field !== "title"){
 			return new Error("Unable to update");
 		}
 		
@@ -55,13 +55,13 @@ class PartyModel extends Party implements IModel {
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during update Party");
+				: new Error("Some Error during update Position");
 		}
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
-			return new Error("This Party doesnt exist");
+			return new Error("This Position doesnt exist");
 		}
 
 		try{
@@ -71,7 +71,7 @@ class PartyModel extends Party implements IModel {
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during removing Party");
+				: new Error("Some Error during removing Position");
 		}
 	}
 
@@ -81,4 +81,4 @@ class PartyModel extends Party implements IModel {
 	}
 }
 
-export default PartyModel;
+export default PositionDAO;

@@ -1,16 +1,16 @@
-import db from '../connect';
+import db from './connect';
 import { QueryResult } from 'pg';
 import IModel from './IModel';
-import Voter from './Voter';
+import Party from './Party';
 
 enum Query {
-	INSERT = "INSERT INTO Voters(name, age, id) VALUES($1, $2, $3)",
-	SELECT = "SELECT id, name, age, voted_yet FROM Voters WHERE digit = $1",
-	UPDATE = "UPDATE Voters SET $1 =$2 WHERE digit = $3",
-	DELETE = "DELETE FROM Voters WHERE digit = $1"
+	INSERT = "INSERT INTO Parties(fullname, initials) VALUES($1, $2)",
+	SELECT = "SELECT initials, fullname FROM Parties WHERE id = $1",
+	UPDATE = "UPDATE Parties SET $1 = $2 WHERE id = $3",
+	DELETE = "DELETE FROM Parties WHERE id = $1"
 };
 
-class VoterModel extends Voter implements IModel {
+class PartyDAO extends Party implements IModel {
 	constructor(){
 		super();
 	}
@@ -18,12 +18,12 @@ class VoterModel extends Voter implements IModel {
 	public async insert(): Promise<QueryResult | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
-				[this.name, this.age, this.id]);
+				[this.fullName, this.initials]);
 			return res;
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during insert Voter");
+				: new Error("Some Error during insert Party");
 		}
 	}
 
@@ -35,16 +35,16 @@ class VoterModel extends Voter implements IModel {
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during select Voter");
+				: new Error("Some Error during select Party");
 		}
 	}
 
 	public async update(field: string, newValue: any): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
-			return new Error("This Voter doesnt exist");
+			return new Error("This Party doesnt exist");
 		}
 
-		if((field !== "name") && (field !== "age") && (field !== "votes")){
+		if((field !== "id") && (field !== "fullname") && (field !== "initials")){
 			return new Error("Unable to update");
 		}
 		
@@ -55,13 +55,13 @@ class VoterModel extends Voter implements IModel {
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during update Voter");
+				: new Error("Some Error during update Party");
 		}
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
-			return new Error("This Voter doesnt exist");
+			return new Error("This Party doesnt exist");
 		}
 
 		try{
@@ -71,7 +71,7 @@ class VoterModel extends Voter implements IModel {
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
-				: new Error("Some Error during removing Voter");
+				: new Error("Some Error during removing Party");
 		}
 	}
 
@@ -81,4 +81,4 @@ class VoterModel extends Voter implements IModel {
 	}
 }
 
-export default VoterModel;
+export default PartyDAO;

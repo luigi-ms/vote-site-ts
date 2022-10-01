@@ -3,7 +3,7 @@ import PartyActions from '../actions/PartyActions';
 
 const party: Router = express.Router();
 
-party.post("/party/", (req: Request<{ fullName: string, initials: string }>, res: Response) => {
+party.post("/party/new", (req: Request<{ fullName: string, initials: string }>, res: Response) => {
 	const { fullName, initials } = req.body;
 
 	PartyActions.create(fullName, initials)
@@ -19,7 +19,7 @@ party.get("/party/:id", (req: Request, res: Response) => {
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-party.put("/party/", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
+party.put("/party/modify", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
 	const { id, field, newValue } = req.body;
 
 	PartyActions.update(id, field, newValue)
@@ -27,7 +27,7 @@ party.put("/party/", (req: Request<{ id: number, field: string, newValue: any }>
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-party.delete("/party/", (req: Request<{ id: number }>, res: Response) => {
+party.delete("/party/remove", (req: Request<{ id: number }>, res: Response) => {
 	const id: number = req.body.id;
 
 	PartyActions.destroy(id)

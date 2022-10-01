@@ -19,7 +19,7 @@ voter.get("/voter/:id", (req: Request, res: Response) => {
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-voter.put("/voter/", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
+voter.put("/voter/modify", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
 	const { id, field, newValue } = req.body;
 
 	VoterActions.update(id, field, newValue)
@@ -27,7 +27,7 @@ voter.put("/voter/", (req: Request<{ id: number, field: string, newValue: any }>
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-voter.delete("/voter/", (req: Request<{ id: number }>, res: Response) => {
+voter.delete("/voter/remove", (req: Request<{ id: number }>, res: Response) => {
 	const id: number = req.body.id;
 
 	VoterActions.destroy(id)

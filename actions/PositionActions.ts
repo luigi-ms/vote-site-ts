@@ -1,15 +1,14 @@
 import { QueryResult } from 'pg';
-import PartyDAO from '../models/PartyDAO';
+import PositionDAO from '../models/PositionDAO';
 
-class PartyActions {
-	static async create(fullName: string, initials: string): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+class PositionActions {
+	static async create(title: string): Promise<QueryResult | Error> {
+		const pos = new PositionDAO();
 	
-		party.fullName = fullName;
-		party.initials = initials;
+		pos.title = title;
 
 		try{
-			const data = await party.insert();
+			const data = await pos.insert();
 			return Promise.resolve(data);
 		}catch(err){
 			return Promise.reject(err);
@@ -17,12 +16,12 @@ class PartyActions {
 	}
 
 	static async read(id: number): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+		const pos = new PositionDAO();
 
-		party.id = id;
+		pos.id = id;
 
 		try{
-			const data = await party.select();
+			const data = await pos.select();
 			return Promise.resolve(data);
 		}catch(err){
 			return Promise.reject(err);
@@ -30,12 +29,12 @@ class PartyActions {
 	}
 
 	static async update(id: number, field: string, newValue: any): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+		const pos = new PositionDAO();
 
-		party.id = id;
+		pos.id = id;
 
 		try{
-			const data = await party.update(field, newValue);
+			const data = await pos.update(field, newValue);
 			return Promise.resolve(data);
 		}catch(err){
 			return Promise.reject(err);
@@ -43,17 +42,18 @@ class PartyActions {
 	}
 
 	static async destroy(id: number): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+		const pos = new PositionDAO();
 
-		party.id = id;
+		pos.id = id;
 
 		try{
-			const data = await party.remove();
+			const data = await pos.remove();
 			return Promise.resolve(data);
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
+
 }
 
-export default PartyActions;
+export default PositionActions;

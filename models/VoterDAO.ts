@@ -5,9 +5,9 @@ import Voter from './Voter';
 
 enum Query {
 	INSERT = "INSERT INTO Voters(name, age, id) VALUES($1, $2, $3)",
-	SELECT = "SELECT id, name, age, voted_yet FROM Voters WHERE digit = $1",
-	UPDATE = "UPDATE Voters SET $1 =$2 WHERE digit = $3",
-	DELETE = "DELETE FROM Voters WHERE digit = $1"
+	SELECT = "SELECT id, name, age, voted_yet FROM Voters WHERE id = $1",
+	UPDATE = "UPDATE Voters SET $1 = $2 WHERE id = $3",
+	DELETE = "DELETE FROM Voters WHERE id = $1"
 };
 
 class VoterDAO extends Voter implements IModel {
@@ -27,11 +27,11 @@ class VoterDAO extends Voter implements IModel {
 		}
 	}
 
-	public async select(): Promise<QueryResult | Error> {
+	public async select(): Promise<Array<any> | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.id]);
-			return res;
+			return res.rows;
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
@@ -39,12 +39,12 @@ class VoterDAO extends Voter implements IModel {
 		}
 	}
 
-	public async update(field: string, newValue: any): Promise<QueryResult | Error> {
+	public async update(field: string, newValue: number | boolean): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
 			return new Error("This Voter doesnt exist");
 		}
 
-		if((field !== "name") && (field !== "age") && (field !== "votes")){
+		if((field !== "age") && (field !== "voted_yet")){
 			return new Error("Unable to update");
 		}
 		

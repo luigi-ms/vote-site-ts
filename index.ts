@@ -6,6 +6,7 @@ import pos from './routes/position';
 
 const app: Express = express();
 
+app.use(express.json());
 app.use(cand);
 app.use(voter);
 app.use(party);

@@ -27,11 +27,11 @@ class CandidateDAO extends Candidate implements IModel {
 		}
 	}
 
-	public async select(): Promise<QueryResult | Error> {
+	public async select(): Promise<Array<any> | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.digit]);
-			return res;
+			return res.rows;
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
@@ -39,7 +39,7 @@ class CandidateDAO extends Candidate implements IModel {
 		}
 	}
 
-	public async update(field: string, newValue: any): Promise<QueryResult | Error> {
+	public async update(field: string, newValue: number | string): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
 			return new Error("This Candidate doesnt exist");
 		}

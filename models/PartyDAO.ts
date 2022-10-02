@@ -27,11 +27,11 @@ class PartyDAO extends Party implements IModel {
 		}
 	}
 
-	public async select(): Promise<QueryResult | Error> {
+	public async select(): Promise<Array<any> | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.id]);
-			return res;
+			return res.rows;
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
@@ -39,12 +39,12 @@ class PartyDAO extends Party implements IModel {
 		}
 	}
 
-	public async update(field: string, newValue: any): Promise<QueryResult | Error> {
+	public async update(field: string, newValue: string): Promise<QueryResult | Error> {
 		if(!(await this.itExists())){
 			return new Error("This Party doesnt exist");
 		}
 
-		if((field !== "id") && (field !== "fullname") && (field !== "initials")){
+		if((field !== "fullname") && (field !== "initials")){
 			return new Error("Unable to update");
 		}
 		

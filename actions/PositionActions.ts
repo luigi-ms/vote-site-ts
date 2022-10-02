@@ -15,7 +15,7 @@ class PositionActions {
 		}
 	}
 
-	static async read(id: number): Promise<QueryResult | Error> {
+	static async read(id: number): Promise<Array<any> | Error> {
 		const pos = new PositionDAO();
 
 		pos.id = id;
@@ -28,7 +28,7 @@ class PositionActions {
 		}
 	}
 
-	static async update(id: number, field: string, newValue: any): Promise<QueryResult | Error> {
+	static async update(id: number, field: string, newValue: string): Promise<QueryResult | Error> {
 		const pos = new PositionDAO();
 
 		pos.id = id;

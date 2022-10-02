@@ -17,7 +17,7 @@ class VoterActions {
 		}
 	}
 
-	static async read(id: number): Promise<QueryResult | Error> {
+	static async read(id: number): Promise<Array<any> | Error> {
 		const voter = new VoterDAO();
 
 		voter.id = id;
@@ -30,7 +30,7 @@ class VoterActions {
 		}
 	}
 
-	static async update(id: number, field: string, newValue: any): Promise<QueryResult | Error> {
+	static async update(id: number, field: string, newValue: number | boolean): Promise<QueryResult | Error> {
 		const voter = new VoterDAO();
 
 		voter.id = id;

@@ -19,7 +19,7 @@ cand.get("/candidate/:digit", (req: Request, res: Response) => {
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-cand.put("/candidate/modify", (req: Request<{ digit: number, field: string, newValue: any }>, res: Response) => {
+cand.put("/candidate/modify", (req: Request<{ digit: number, field: string, newValue: number | string }>, res: Response) => {
 	const { digit, field, newValue } = req.body;
 
 	CandidateActions.update(digit, field, newValue)

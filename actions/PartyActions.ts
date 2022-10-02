@@ -16,7 +16,7 @@ class PartyActions {
 		}
 	}
 
-	static async read(id: number): Promise<QueryResult | Error> {
+	static async read(id: number): Promise<Array<any> | Error> {
 		const party = new PartyDAO();
 
 		party.id = id;
@@ -29,7 +29,7 @@ class PartyActions {
 		}
 	}
 
-	static async update(id: number, field: string, newValue: any): Promise<QueryResult | Error> {
+	static async update(id: number, field: string, newValue: string): Promise<QueryResult | Error> {
 		const party = new PartyDAO();
 
 		party.id = id;

@@ -19,7 +19,7 @@ party.get("/party/:id", (req: Request, res: Response) => {
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-party.put("/party/modify", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
+party.put("/party/modify", (req: Request<{ id: number, field: string, newValue: string }>, res: Response) => {
 	const { id, field, newValue } = req.body;
 
 	PartyActions.update(id, field, newValue)

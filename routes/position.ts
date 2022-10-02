@@ -19,7 +19,7 @@ pos.get("/position/:id", (req: Request, res: Response) => {
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-pos.put("/position/modify", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
+pos.put("/position/modify", (req: Request<{ id: number, field: string, newValue: string }>, res: Response) => {
 	const { id, field, newValue } = req.body;
 
 	PositionActions.update(id, field, newValue)

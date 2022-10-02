@@ -19,7 +19,7 @@ voter.get("/voter/:id", (req: Request, res: Response) => {
 		.catch(rejected => res.status(400).json({ rejected }));
 });
 
-voter.put("/voter/modify", (req: Request<{ id: number, field: string, newValue: any }>, res: Response) => {
+voter.put("/voter/modify", (req: Request<{ id: number, field: string, newValue: number | boolean }>, res: Response) => {
 	const { id, field, newValue } = req.body;
 
 	VoterActions.update(id, field, newValue)

@@ -19,7 +19,7 @@ class CandidateActions {
 		}
 	}
 
-	static async read(digit: number): Promise<QueryResult | Error> {
+	static async read(digit: number): Promise<Array<any> | Error> {
 		const cand = new CandidateDAO();
 
 		cand.digit = digit;
@@ -32,7 +32,7 @@ class CandidateActions {
 		}
 	}
 
-	static async update(digit: number, field: string, newValue: any): Promise<QueryResult | Error> {
+	static async update(digit: number, field: string, newValue: number | string): Promise<QueryResult | Error> {
 		const cand = new CandidateDAO();
 
 		cand.digit = digit;

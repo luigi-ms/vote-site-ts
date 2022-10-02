@@ -19,6 +19,7 @@ class VoterDAO extends Voter implements IModel {
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
 				[this.name, this.age, this.id]);
+
 			return res;
 		}catch(err: unknown){
 			return (err instanceof Error)

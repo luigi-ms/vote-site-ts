@@ -32,7 +32,7 @@ voter.get("/voter/:id", (req: Request, res: Response) => {
 			}
 		})
 		.catch((rejected: Error) => {
-			res.status(400).json({ rejected });
+			res.status(400).json({ error: rejected.message });
 		});
 });
 

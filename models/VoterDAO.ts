@@ -32,7 +32,12 @@ class VoterDAO extends Voter implements IModel {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.id]);
-			return res.rows;
+
+			if(res.rowCount > 0){
+				return res.rows;
+			}else{
+				return new Error("This voter does not exists");
+			}
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)

@@ -41,8 +41,12 @@ class VoterActions {
 	static async update(id: number, field: string, newValue: number | boolean): Promise<QueryResult | Error> {
 		const voter = new VoterDAO();
 
-		if(this.isInvalid('id', id) && this.isInvalid('field', field) && this.isInvalid('newValue', newValue)){
+		if(this.isInvalid('id', id) || this.isInvalid('field', field) || this.isInvalid('newValue', newValue)){
 			return Promise.reject(new Error('incorrect value or missing field'));
+		}else if(field === 'age' && (typeof newValue !== typeof voter.age)){
+			return Promise.reject(new Error('incorrect type to "age" field'));
+		}else if(field === 'voted_yet' && (typeof newValue !== typeof voter.votedYet)){
+			return Promise.reject(new Error('incorrect type to "voted yet?" field'));
 		}
 
 		voter.id = id;

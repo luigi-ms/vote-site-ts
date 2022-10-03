@@ -6,7 +6,7 @@ import Voter from './Voter';
 enum Query {
 	INSERT = "INSERT INTO Voters(name, age, id) VALUES($1, $2, $3)",
 	SELECT = "SELECT id, name, age, voted_yet FROM Voters WHERE id = $1",
-	UPDATE = "UPDATE Voters SET $1 = $2 WHERE id = $3",
+	UPDATE = "UPDATE Voters SET $0 = $1 WHERE id = $2",
 	DELETE = "DELETE FROM Voters WHERE id = $1"
 };
 
@@ -46,17 +46,24 @@ class VoterDAO extends Voter implements IModel {
 	}
 
 	public async update(field: string, newValue: number | boolean): Promise<QueryResult | Error> {
+		let updateQuery: string = "";
+
 		if(!(await this.itExists())){
 			return new Error("This Voter doesnt exist");
 		}
 
 		if((field !== "age") && (field !== "voted_yet")){
 			return new Error("Unable to update");
+		}else if(field === 'age'){
+			updateQuery = Query.UPDATE.replace(/\$0/, "age");
+		}else if(field === 'voted_yet'){
+			updateQuery = Query.UPDATE.replace(/\$0/, "voted_yet");
 		}
 		
 		try{
-			const res: QueryResult = await db.query(Query.UPDATE,
-				[field, newValue, this.id]);
+			const res: QueryResult = await db.query(updateQuery,
+				[newValue, this.id]);
+
 			return res;
 		}catch(err: unknown){
 			return (err instanceof Error)

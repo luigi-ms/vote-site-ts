@@ -40,8 +40,16 @@ voter.put("/voter/modify", (req: Request<{ id: number, field: string, newValue: 
 	const { id, field, newValue } = req.body;
 
 	VoterActions.update(id, field, newValue)
-		.then(resolved => res.json({ resolved }))
-		.catch(rejected => res.status(400).json({ rejected }));
+		.then((resolved: QueryResult | Error) => {
+			if(resolved instanceof Error){
+				res.status(500).json({ error: resolved.message });
+			}else{
+				res.status(200).json({ success: resolved.command });
+			}
+		})
+		.catch((rejected: Error) => {
+			res.status(400).json({ error: rejected.message });
+		});
 });
 
 voter.delete("/voter/remove", (req: Request<{ id: number }>, res: Response) => {

@@ -6,7 +6,7 @@ import Party from './Party';
 enum Query {
 	INSERT = "INSERT INTO Parties(fullname, initials) VALUES($1, $2)",
 	SELECT = "SELECT initials, fullname FROM Parties WHERE id = $1",
-	UPDATE = "UPDATE Parties SET $1 = $2 WHERE id = $3",
+	UPDATE = "UPDATE Parties SET $0 = $1 WHERE id = $2",
 	DELETE = "DELETE FROM Parties WHERE id = $1"
 };
 
@@ -19,6 +19,7 @@ class PartyDAO extends Party implements IModel {
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
 				[this.fullName, this.initials]);
+
 			return res;
 		}catch(err: unknown){
 			return (err instanceof Error)
@@ -31,7 +32,12 @@ class PartyDAO extends Party implements IModel {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.id]);
-			return res.rows;
+	
+			if(res.rowCount > 0){
+				return res.rows;
+			}else{
+				return new Error("This party does not exists");
+			}
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
@@ -40,17 +46,24 @@ class PartyDAO extends Party implements IModel {
 	}
 
 	public async update(field: string, newValue: string): Promise<QueryResult | Error> {
-		if(!(await this.itExists())){
+		let updateQuery: string = "";
+
+		if((await this.itExists())){
 			return new Error("This Party doesnt exist");
 		}
 
-		if((field !== "fullname") && (field !== "initials")){
+		if((field !== "fullName") && (field !== "initials")){
 			return new Error("Unable to update");
+		}else if(field === 'fullName'){
+			updateQuery = Query.UPDATE.replace(/\$0/, "fullname");
+		}else if(field === 'initials'){
+			updateQuery = Query.UPDATE.replace(/\$0/, "initials");
 		}
-		
+			
 		try{
-			const res: QueryResult = await db.query(Query.UPDATE,
-				[field, newValue, this.id]);
+			const res: QueryResult = await db.query(updateQuery,
+				[newValue, this.id]);
+
 			return res;
 		}catch(err: unknown){
 			return (err instanceof Error)
@@ -60,7 +73,7 @@ class PartyDAO extends Party implements IModel {
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
-		if(!(await this.itExists())){
+		if((await this.itExists())){
 			return new Error("This Party doesnt exist");
 		}
 
@@ -77,7 +90,7 @@ class PartyDAO extends Party implements IModel {
 
 	public async itExists(): Promise<boolean> {
 		const found = await this.select();
-		return found ? true : false;
+		return (found instanceof Error) ? true : false;
 	}
 }
 

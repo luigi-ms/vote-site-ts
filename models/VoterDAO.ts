@@ -48,7 +48,7 @@ class VoterDAO extends Voter implements IModel {
 	public async update(field: string, newValue: number | boolean): Promise<QueryResult | Error> {
 		let updateQuery: string = "";
 
-		if(!(await this.itExists())){
+		if((await this.itExists())){
 			return new Error("This Voter doesnt exist");
 		}
 
@@ -73,7 +73,7 @@ class VoterDAO extends Voter implements IModel {
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
-		if(!(await this.itExists())){
+		if((await this.itExists())){
 			return new Error("This Voter doesnt exist");
 		}
 

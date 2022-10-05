@@ -90,7 +90,7 @@ class VoterDAO extends Voter implements IModel {
 
 	public async itExists(): Promise<boolean> {
 		const found = await this.select();
-		return found ? true : false;
+		return !(found instanceof Error) ? true : false;
 	}
 }
 

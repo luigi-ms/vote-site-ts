@@ -70,6 +70,8 @@ class VoterActions {
 
 		try{
 			const data = await voter.remove();
+
+			console.log(data);
 			return Promise.resolve(data);
 		}catch(err){
 			return Promise.reject(err);

@@ -5,7 +5,8 @@ import Candidate from './Candidate';
 
 enum Query {
 	INSERT = "INSERT INTO Candidates(name, digit, age, party_id, position_id) VALUES($1, $2, $3, $4, $5)",
-	SELECT = "SELECT digit, title, name, initials FROM Candidates, Parties, Positions WHERE Parties.id = party_id AND Positions.id = position_id AND digit = $1",
+	SELECT = "SELECT digit, title, name, initials, votes FROM Candidates, Parties, Positions WHERE Parties.id = party_id AND Positions.id = position_id AND digit = $1",
+	UPDATE_VOTES = "UPDATE Candidates SET votes = votes + 1 WHERE digit = $1",
 	UPDATE = "UPDATE Candidates SET $0 = $1 WHERE digit = $2",
 	DELETE = "DELETE FROM Candidates WHERE digit = $1"
 };
@@ -45,6 +46,13 @@ class CandidateDAO extends Candidate implements IModel {
 		}
 	}
 
+	public async increaseVotes(): Promise<QueryResult> {
+		const res: QueryResult = await db.query(Query.UPDATE_VOTES,
+			[this.digit]);
+		
+		return res;
+	}
+	
 	public async update(field: string, newValue: number | string): Promise<QueryResult | Error> {
 		let updateQuery: string = "";
 
@@ -95,6 +103,7 @@ class CandidateDAO extends Candidate implements IModel {
 
 	public async itExists(): Promise<boolean> {
 		const found = await this.select();
+	
 		return (found instanceof Error) ? true : false;
 	}
 }

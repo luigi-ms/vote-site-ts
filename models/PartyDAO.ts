@@ -5,7 +5,8 @@ import Party from './Party';
 
 enum Query {
 	INSERT = "INSERT INTO Parties(fullname, initials) VALUES($1, $2)",
-	SELECT = "SELECT initials, fullname FROM Parties WHERE id = $1",
+	SELECT_BY_ID = "SELECT initials, fullname FROM Parties WHERE id = $1",
+	SELECT_BY_FULLNAME = "SELECT initials, fullname FROM Parties WHERE fullname = $1",
 	UPDATE = "UPDATE Parties SET $0 = $1 WHERE id = $2",
 	DELETE = "DELETE FROM Parties WHERE id = $1"
 };
@@ -16,6 +17,10 @@ class PartyDAO extends Party implements IModel {
 	}
 
 	public async insert(): Promise<QueryResult | Error> {
+		if((await this.itExists())){
+			return new Error("This Party already exists");
+		}
+
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
 				[this.fullName, this.initials]);
@@ -28,13 +33,30 @@ class PartyDAO extends Party implements IModel {
 		}
 	}
 
-	public async select(): Promise<Array<any> | Error> {
+	public async select(): Promise<QueryResult | Error> {
 		try{
-			const res: QueryResult = await db.query(Query.SELECT,
+			const res: QueryResult = await db.query(Query.SELECT_BY_ID,
 				[this.id]);
 	
 			if(res.rowCount > 0){
-				return res.rows;
+				return res;
+			}else{
+				return new Error("This party does not exists");
+			}
+		}catch(err: unknown){
+			return (err instanceof Error)
+				? new Error(err.stack)
+				: new Error("Some Error during select Party");
+		}
+	}
+
+	public async selectByFullName(): Promise<QueryResult | Error> {
+		try{
+			const res: QueryResult = await db.query(Query.SELECT_BY_FULLNAME,
+				[this.fullName]);
+	
+			if(res.rowCount > 0){
+				return res;
 			}else{
 				return new Error("This party does not exists");
 			}
@@ -48,7 +70,7 @@ class PartyDAO extends Party implements IModel {
 	public async update(field: string, newValue: string): Promise<QueryResult | Error> {
 		let updateQuery: string = "";
 
-		if((await this.itExists())){
+		if((await this.itExists()) === false){
 			return new Error("This Party doesnt exist");
 		}
 
@@ -73,7 +95,7 @@ class PartyDAO extends Party implements IModel {
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
-		if((await this.itExists())){
+		if((await this.itExists()) === false){
 			return new Error("This Party doesnt exist");
 		}
 
@@ -89,8 +111,12 @@ class PartyDAO extends Party implements IModel {
 	}
 
 	public async itExists(): Promise<boolean> {
-		const found = await this.select();
-		return (found instanceof Error) ? true : false;
+		const foundId = await this.select();
+		const foundName = await this.selectByFullName();
+
+		return ((foundId instanceof Error) === false || (foundName instanceof Error) === false) 
+			? true
+			: false;
 	}
 }
 

@@ -1,75 +1,99 @@
 import { QueryResult } from 'pg';
 import PartyDAO from '../models/PartyDAO';
+import Party from '../models/Party';
 
 class PartyActions {
-	static async create(fullName: string, initials: string): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+	static async create(fullName: string, initials: string): Promise<string | Error> {
+		const dao = new PartyDAO();
 	
-		if(this.isInvalid('fullName', fullName) && this.isInvalid('initials', initials)){
+		if(this.isInvalid('fullName', fullName) || this.isInvalid('initials', initials)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		party.fullName = fullName;
-		party.initials = initials;
+		dao.fullName = fullName;
+		dao.initials = initials;
 
 		try{
-			const data = await party.insert();
-			return Promise.resolve(data);
+			const data = await dao.insert();
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				return Promise.resolve(data.command);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async read(id: number): Promise<Array<any> | Error> {
-		const party = new PartyDAO();
+	static async read(id: number): Promise<Party | Error> {
+		const dao = new PartyDAO();
 
 		if(this.isInvalid('id', id)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		party.id = id;
+		dao.id = id;
 
 		try{
-			const data = await party.select();
-			return Promise.resolve(data);
+			const data = await dao.select();
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const party = new Party();
+
+				party.id = data.rows[0].id;
+				party.fullName = data.rows[0].fullname;
+				party.initials = data.rows[0].initials;
+
+				return Promise.resolve(party);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async update(id: number, field: string, newValue: string): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+	static async update(id: number, field: string, newValue: string): Promise<Party | Error> {
+		const dao = new PartyDAO();
 
 		if(this.isInvalid('id', id) || this.isInvalid('field', field) || this.isInvalid('newValue', newValue)){
 			return Promise.reject(new Error('incorrect value or missing field'));
-		}else if(field === 'fullName' && (typeof newValue !== typeof party.fullName)){
+		}else if(field === 'fullName' && (typeof newValue !== typeof dao.fullName)){
 			return Promise.reject(new Error('incorrect type to "fullName" field'));
-		}else if(field === 'initials' && (typeof newValue !== typeof party.initials)){
+		}else if(field === 'initials' && (typeof newValue !== typeof dao.initials)){
 			return Promise.reject(new Error('incorrect type to "initials" field'));
 		}
 
-		party.id = id;
+		dao.id = id;
 
 		try{
-			const data = await party.update(field, newValue);
-			return Promise.resolve(data);
+			const data = await dao.update(field, newValue);
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const result = await this.read(dao.id);
+				return Promise.resolve(result);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async destroy(id: number): Promise<QueryResult | Error> {
-		const party = new PartyDAO();
+	static async destroy(id: number): Promise<string | Error> {
+		const dao = new PartyDAO();
 
 		if(this.isInvalid('id', id)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		party.id = id;
+		dao.id = id;
 
 		try{
-			const data = await party.remove();
-			return Promise.resolve(data);
+			const data = await dao.remove();
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				return Promise.resolve(data.command);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}

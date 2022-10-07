@@ -1,78 +1,107 @@
 import { QueryResult } from 'pg';
 import VoterDAO from '../models/VoterDAO';
+import Voter from '../models/Voter';
 
 class VoterActions {
-	static async create(id: number, name: string, age: number): Promise<QueryResult | Error> {
-		const voter = new VoterDAO();
+	static async create(id: number, name: string, age: number): Promise<Voter | Error> {
+		const dao = new VoterDAO();
 
-		if(this.isInvalid('id', id) && this.isInvalid('name', name) && this.isInvalid('age', age)){
+		if(this.isInvalid('id', id) || this.isInvalid('name', name) || this.isInvalid('age', age)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 	
-		voter.id = id;
-		voter.name = name;
-		voter.age = age;
+		dao.id = id;
+		dao.name = name;
+		dao.age = age;
 
 		try{
-			const data = await voter.insert();
-			return Promise.resolve(data);
+			const data = await dao.insert();
+
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const result = await this.read(dao.id);
+
+				return Promise.resolve(result);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async read(id: number): Promise<Array<any> | Error> {
-		const voter = new VoterDAO();
+	static async read(id: number): Promise<Voter | Error> {
+		const dao = new VoterDAO();
+		const voter = new Voter();
 
 		if((this.isInvalid('id', id))){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		voter.id = id;
+		dao.id = id;
 
 		try{
-			const data = await voter.select();
-			return Promise.resolve(data);
+			const data = await dao.select();
+			
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				voter.id = data.rows[0].id;
+				voter.name = data.rows[0].name;
+				voter.age = data.rows[0].age;
+				voter.votedYet = data.rows[0].voted_yet;
+
+				return Promise.resolve(voter);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async update(id: number, field: string, newValue: number | boolean): Promise<QueryResult | Error> {
-		const voter = new VoterDAO();
+	static async update(id: number, field: string, newValue: number | boolean): Promise<Voter | Error> {
+		const dao = new VoterDAO();
 
 		if(this.isInvalid('id', id) || this.isInvalid('field', field) || this.isInvalid('newValue', newValue)){
 			return Promise.reject(new Error('incorrect value or missing field'));
-		}else if(field === 'age' && (typeof newValue !== typeof voter.age)){
+		}else if(field === 'age' && (typeof newValue !== typeof dao.age)){
 			return Promise.reject(new Error('incorrect type to "age" field'));
-		}else if(field === 'voted_yet' && (typeof newValue !== typeof voter.votedYet)){
+		}else if(field === 'voted_yet' && (typeof newValue !== typeof dao.votedYet)){
 			return Promise.reject(new Error('incorrect type to "voted yet?" field'));
 		}
 
-		voter.id = id;
+		dao.id = id;
 
 		try{
-			const data = await voter.update(field, newValue);
-			return Promise.resolve(data);
+			const data = await dao.update(field, newValue);
+	
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const result = await this.read(dao.id);
+
+				return Promise.resolve(result);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async destroy(id: number): Promise<QueryResult | Error> {
-		const voter = new VoterDAO();
+	static async destroy(id: number): Promise<string | Error> {
+		const dao = new VoterDAO();
 
 		if(this.isInvalid('id', id)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		voter.id = id;
+		dao.id = id;
 
 		try{
-			const data = await voter.remove();
+			const data = await dao.remove();
 
-			console.log(data);
-			return Promise.resolve(data);
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				return Promise.resolve(data.command);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
@@ -85,7 +114,7 @@ class VoterActions {
 			checkName: (typeof value !== typeof voter.name),
 			checkAge: (typeof value !== typeof voter.age),
 			checkField: (typeof value !== 'string'),
-			checkNewValue: isNaN(value)
+			checkNewValue: (typeof value === 'number' && isNaN(value))
 		};
 
 		if(param === 'id' && constraints.checkID){
@@ -97,6 +126,7 @@ class VoterActions {
 		}else if(param === 'field' && constraints.checkField){
 			return true;
 		}else if(param === 'newValue' && constraints.checkNewValue){
+			console.log('newvalue not ok');
 			return true;
 		}else{
 			return false;

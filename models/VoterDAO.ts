@@ -15,12 +15,16 @@ class VoterDAO extends Voter implements IModel {
 		super();
 	}
 
-	public async insert(): Promise<QueryResult | Error> {
+	public async insert(): Promise<QueryResult | Error> {	
+		if((await this.itExists())){
+			return new Error("This Voter already exists");
+		}
+
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
 				[this.name, this.age, this.id]);
 
-			return res;
+				return res;
 		}catch(err: unknown){
 			return (err instanceof Error)
 				? new Error(err.stack)
@@ -28,13 +32,13 @@ class VoterDAO extends Voter implements IModel {
 		}
 	}
 
-	public async select(): Promise<Array<any> | Error> {
+	public async select(): Promise<QueryResult | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.id]);
 
 			if(res.rowCount > 0){
-				return res.rows;
+				return res;
 			}else{
 				return new Error("This voter does not exists");
 			}
@@ -48,7 +52,7 @@ class VoterDAO extends Voter implements IModel {
 	public async update(field: string, newValue: number | boolean): Promise<QueryResult | Error> {
 		let updateQuery: string = "";
 
-		if((await this.itExists())){
+		if((await this.itExists()) === false){
 			return new Error("This Voter doesnt exist");
 		}
 
@@ -73,7 +77,7 @@ class VoterDAO extends Voter implements IModel {
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
-		if((await this.itExists())){
+		if((await this.itExists()) === false){
 			return new Error("This Voter doesnt exist");
 		}
 
@@ -91,7 +95,9 @@ class VoterDAO extends Voter implements IModel {
 	public async itExists(): Promise<boolean> {
 		const found = await this.select();
 
-		return (found instanceof Error) ? true : false;
+		return ((found instanceof Error) === false) 
+			? true 
+			: false;
 	}
 }
 

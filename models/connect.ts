@@ -1,10 +1,10 @@
 import { Client } from 'pg';
 
 const config = {
-	user: "u0_a440",
+	user: "user",
 	host: "localhost",
 	database: "vote-site",
-	password: "",
+	password: "password",
 	port: 5432
 };
 

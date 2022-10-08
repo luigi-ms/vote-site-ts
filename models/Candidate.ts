@@ -2,16 +2,16 @@ import User from './User';
 
 class Candidate extends User {
 	private _digit: number;
-	private _partyId: number;
-	private _positionId: number;
+	private _party: string;
+	private _position: string;
 	private _votes: number;
 	private _state: string;
 
 	constructor(){
 		super('', 0);
 		this._digit = 0;
-		this._partyId = 0;
-		this._positionId = 0;
+		this._party = "";
+		this._position = "";
 		this._votes = 0;
 		this._state = "";
 	}
@@ -24,20 +24,20 @@ class Candidate extends User {
 		this._digit = newDigit;
 	}
 
-	public get partyId(): number {
-		return this._partyId;
+	public get party(): string {
+		return this._party;
 	}
 
-	public set partyId(newPartyId: number){
-		this._partyId = newPartyId;
+	public set party(newParty: string){
+		this._party = newParty;
 	}
 
-	public get positionId(): number {
-		return this._positionId;
+	public get position(): string {
+		return this._position;
 	}
 
-	public set positionId(newPositionId: number){
-		this._positionId = newPositionId;
+	public set position(newPosition: string){
+		this._position = newPosition;
 	}
 
 	public get votes(): number {

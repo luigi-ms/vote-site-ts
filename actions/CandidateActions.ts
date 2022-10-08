@@ -1,74 +1,106 @@
 import { QueryResult } from 'pg';
 import CandidateDAO from '../models/CandidateDAO';
+import Candidate from '../models/Candidate';
 
 class CandidateActions {
-	static async create(name: string, age: number, digit: number, partyId: number, positionId: number): Promise<QueryResult | Error> {
-		const cand = new CandidateDAO();
+	static async create(name: string, age: number, digit: number, party: string, position: string): Promise<Candidate | Error> {
+		const dao = new CandidateDAO();
 			
-		if(this.isInvalid('name', name) && this.isInvalid('age', age) && this.isInvalid('digit', digit) && this.isInvalid('partyID', partyId) && this.isInvalid('positionID', positionId) ){
+		if(this.isInvalid('name', name) && this.isInvalid('age', age) && this.isInvalid('digit', digit) && this.isInvalid('party', party) && this.isInvalid('position', position)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		cand.digit = digit;
-		cand.name = name;
-		cand.age = age;
-		cand.partyId = partyId;
-		cand.positionId = positionId;
+		dao.digit = digit;
+		dao.name = name;
+		dao.age = age;
+		dao.party = party;
+		dao.position = position;
 
 		try{
-			const data = await cand.insert();
-			return Promise.resolve(data);
+			const data = await dao.insert();
+
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const result = await this.read(dao.digit);
+				return Promise.resolve(result);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async read(digit: number): Promise<Array<any> | Error> {
-		const cand = new CandidateDAO();
+	static async read(digit: number): Promise<Candidate | Error> {
+		const dao = new CandidateDAO();
 
 		if(this.isInvalid('digit', digit)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		cand.digit = digit;
+		dao.digit = digit;
 
 		try{
-			const data = await cand.select();
-			return Promise.resolve(data);
+			const data = await dao.select();
+
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const cand = new Candidate();
+
+				cand.digit = data.rows[0].digit;
+				cand.name = data.rows[0].name;
+				cand.age = data.rows[0].age;
+				cand.party = data.rows[0].party;
+				cand.position = data.rows[0].position;
+
+				return Promise.resolve(cand);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async update(digit: number, field: string, newValue: number | string): Promise<QueryResult | Error> {
-		const cand = new CandidateDAO();
+	static async update(digit: number, field: string, newValue: number | string): Promise<Candidate | Error> {
+		const dao = new CandidateDAO();
 
 		if(this.isInvalid('digit', digit) && this.isInvalid('field', field) && this.isInvalid('newValue', newValue)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		cand.digit = digit;
+		dao.digit = digit;
 
 		try{
-			const data = await cand.update(field, newValue);
-			return Promise.resolve(data);
+			const data = await dao.update(field, newValue);
+
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+				const result = await this.read(dao.digit);
+
+				return Promise.resolve(result);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
 	}
 
-	static async destroy(digit: number): Promise<QueryResult | Error> {
-		const cand = new CandidateDAO();
+	static async destroy(digit: number): Promise<string | Error> {
+		const dao = new CandidateDAO();
 
 		if(this.isInvalid('digit', digit)){
 			return Promise.reject(new Error('incorrect value or missing field'));
 		}
 
-		cand.digit = digit;
+		dao.digit = digit;
 
 		try{
-			const data = await cand.remove();
-			return Promise.resolve(data);
+			const data = await dao.remove();
+
+			if(data instanceof Error){
+				return Promise.reject(data);
+			}else{
+			 return Promise.resolve(data.command);
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}
@@ -79,8 +111,8 @@ class CandidateActions {
 		const constraints = {
 			checkDigit: isNaN(value) || (typeof value !== typeof cand.digit),
 			checkAge: isNaN(value) || (typeof value !== typeof cand.age),
-			checkPartyID: isNaN(value) || (typeof value !== typeof cand.partyId),
-			checkPositionID: isNaN(value) || (typeof value !== typeof cand.positionId),
+			checkParty: (typeof value !== typeof cand.party),
+			checkPosition: (typeof value !== typeof cand.position),
 			checkName: (typeof value !== typeof cand.name),
 			checkField: (typeof value !== 'string'),
 			checkNewValue: isNaN(value) || (typeof value !== 'string')
@@ -92,9 +124,9 @@ class CandidateActions {
 			return true;
 		}else if(param === 'age' && constraints.checkAge){
 			return true;
-		}else if(param === 'partyID' && constraints.checkPartyID){
+		}else if(param === 'party' && constraints.checkParty){
 			return true;
-		}else if(param === 'positionID' && constraints.checkPositionID){
+		}else if(param === 'position' && constraints.checkPosition){
 			return true;
 		}else if(param === 'field' && constraints.checkField){
 			return true;

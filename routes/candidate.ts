@@ -1,18 +1,24 @@
-import { QueryResult } from 'pg';
 import express, { Router, Request, Response } from 'express';
 import CandidateActions from '../actions/CandidateActions';
+import Candidate from '../models/Candidate';
 
 const cand: Router = express.Router();
 
-cand.post<{}, any, { digit: number, name: string, age: number, partyID: number, positionID: number }>("/signup/candidate/", (req: Request, res: Response) => {
-	const { digit, name, age, partyID, positionID } = req.body;
+cand.post<{}, any, { digit: number, name: string, age: number, party: string, position: string }>("/signup/candidate/", (req: Request, res: Response) => {
+	const { digit, name, age, party, position } = req.body;
 
-	CandidateActions.create(name, age, digit, partyID, positionID)
-		.then((resolved: QueryResult | Error) => {
+	CandidateActions.create(name, age, digit, party, position)
+		.then((resolved: Candidate | Error) => {
 			if(resolved instanceof Error){
 				res.status(500).json({ error: resolved.message });
 			}else{
-				res.status(200).json({ success: resolved.command });
+				res.status(200).json({ success: {
+					digit: resolved.digit,
+					name: resolved.name,
+					age: resolved.age,
+					party: resolved.party,
+					position: resolved.position
+				}});
 			}
 		})
 		.catch((rejected: Error) => {
@@ -24,11 +30,17 @@ cand.get("/candidate/:digit", (req: Request, res: Response) => {
 	const digit: string = req.params.digit;
 
 	CandidateActions.read(parseInt(digit))
-		.then((resolved: Array<any> | Error) => {
+		.then((resolved: Candidate | Error) => {
 			if(resolved instanceof Error){
 				res.status(500).json({ error: resolved.message });
 			}else{
-				res.status(200).json({ success: resolved });
+				res.status(200).json({ success: {
+					digit: resolved.digit,
+					name: resolved.name,
+					party: resolved.party,
+					position: resolved.position,
+					age: resolved.age
+				}});
 			}
 		})
 		.catch((rejected: Error) => {
@@ -40,11 +52,17 @@ cand.put("/candidate/modify", (req: Request<{ digit: number, field: string, newV
 	const { digit, field, newValue } = req.body;
 
 	CandidateActions.update(digit, field, newValue)
-		.then((resolved: QueryResult | Error) => {
+		.then((resolved: Candidate | Error) => {
 			if(resolved instanceof Error){
 				res.status(500).json({ error: resolved.message });
 			}else{
-				res.status(200).json({ success: resolved.command });
+				res.status(200).json({ success: {
+					digit: resolved.digit,
+					name: resolved.name,
+					party: resolved.party,
+					position: resolved.position,
+					age: resolved.age
+				}});
 			}
 		})
 		.catch((rejected: Error) => {
@@ -56,11 +74,11 @@ cand.delete("/candidate/remove", (req: Request<{ digit: number }>, res: Response
 	const digit: number = req.body.digit;
 
 	CandidateActions.destroy(digit)
-		.then((resolved: QueryResult | Error) => {
+		.then((resolved: string | Error) => {
 			if(resolved instanceof Error){
 				res.status(500).json({ error: resolved.message });
 			}else{
-				res.status(200).json({ success: resolved.command });
+				res.status(200).json({ success: resolved });
 			}
 		})
 		.catch((rejected: Error) => {

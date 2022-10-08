@@ -4,8 +4,8 @@ import IModel from './IModel';
 import Candidate from './Candidate';
 
 enum Query {
-	INSERT = "INSERT INTO Candidates(name, digit, age, party_id, position_id) VALUES($1, $2, $3, $4, $5)",
-	SELECT = "SELECT digit, title, name, initials, votes FROM Candidates, Parties, Positions WHERE Parties.id = party_id AND Positions.id = position_id AND digit = $1",
+	INSERT = "INSERT INTO Candidates(name, digit, age, party, position) VALUES($1, $2, $3, $4, $5)",
+	SELECT = "SELECT digit, position, name, party, votes FROM Candidates WHERE digit = $1",
 	UPDATE_VOTES = "UPDATE Candidates SET votes = votes + 1 WHERE digit = $1",
 	UPDATE = "UPDATE Candidates SET $0 = $1 WHERE digit = $2",
 	DELETE = "DELETE FROM Candidates WHERE digit = $1"
@@ -17,9 +17,12 @@ class CandidateDAO extends Candidate implements IModel {
 	}
 
 	public async insert(): Promise<QueryResult | Error> {
+		if((await this.itExists())){
+			return new Error("This Candidate already exist");
+		}
 		try{
 			const res: QueryResult = await db.query(Query.INSERT,
-				[this.name, this.digit, this.age, this.partyId, this.positionId]);
+				[this.name, this.digit, this.age, this.party, this.position]);
 
 			return res;
 		}catch(err: unknown){
@@ -29,13 +32,13 @@ class CandidateDAO extends Candidate implements IModel {
 		}
 	}
 
-	public async select(): Promise<Array<any> | Error> {
+	public async select(): Promise<QueryResult | Error> {
 		try{
 			const res: QueryResult = await db.query(Query.SELECT,
 				[this.digit]);
 			
 			if(res.rowCount > 0){
-			 return res.rows;
+			 return res;
 			}else{
 				return new Error("This Candidate does not exist");
 			}
@@ -56,20 +59,20 @@ class CandidateDAO extends Candidate implements IModel {
 	public async update(field: string, newValue: number | string): Promise<QueryResult | Error> {
 		let updateQuery: string = "";
 
-		if((await this.itExists())){
+		if((await this.itExists()) === false){
 			return new Error("This Candidate doesnt exist");
 		}
 
-		if((field !== "name") && (field !== "age") && (field !== "partyID") && (field !== "positionID")){
+		if((field !== "name") && (field !== "age") && (field !== "party") && (field !== "position")){
 			return new Error("Unable to update");
 		}else if(field === 'name'){
 			updateQuery = Query.UPDATE.replace(/\$0/, "name");
 		}else if(field === 'age'){
 			updateQuery = Query.UPDATE.replace(/\$0/, "age");
-		}else if(field === 'partyID'){
-			updateQuery = Query.UPDATE.replace(/\$0/, "party_id");
-		}else if(field === 'positionID'){
-			updateQuery = Query.UPDATE.replace(/\$0/, "position_id");
+		}else if(field === 'party'){
+			updateQuery = Query.UPDATE.replace(/\$0/, "party");
+		}else if(field === 'position'){
+			updateQuery = Query.UPDATE.replace(/\$0/, "position");
 		}
 	
 		try{
@@ -85,7 +88,7 @@ class CandidateDAO extends Candidate implements IModel {
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
-		if((await this.itExists())){
+		if((await this.itExists()) === false){
 			return new Error("This Candidate doesnt exist");
 		}
 
@@ -104,7 +107,7 @@ class CandidateDAO extends Candidate implements IModel {
 	public async itExists(): Promise<boolean> {
 		const found = await this.select();
 	
-		return (found instanceof Error) ? true : false;
+		return ((found instanceof Error) === false);
 	}
 }
 

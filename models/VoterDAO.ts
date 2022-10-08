@@ -20,33 +20,19 @@ class VoterDAO extends Voter implements IModel {
 			return new Error("This Voter already exists");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.INSERT,
-				[this.name, this.age, this.id]);
+		const res: QueryResult = await db.query(Query.INSERT,
+			[this.name, this.age, this.id]);
 
-				return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during insert Voter");
-		}
+		return res;
 	}
 
 	public async select(): Promise<QueryResult | Error> {
-		try{
-			const res: QueryResult = await db.query(Query.SELECT,
-				[this.id]);
+		const res: QueryResult = await db.query(Query.SELECT,
+			[this.id]);
 
-			if(res.rowCount > 0){
-				return res;
-			}else{
-				return new Error("This voter does not exists");
-			}
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during select Voter");
-		}
+		return (res.rowCount > 0)
+			? res
+			: new Error("This voter does not exists");
 	}
 
 	public async update(field: string, newValue: number | boolean): Promise<QueryResult | Error> {
@@ -63,17 +49,11 @@ class VoterDAO extends Voter implements IModel {
 		}else if(field === 'voted_yet'){
 			updateQuery = Query.UPDATE.replace(/\$0/, "voted_yet");
 		}
-		
-		try{
-			const res: QueryResult = await db.query(updateQuery,
-				[newValue, this.id]);
 
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during update Voter");
-		}
+		const res: QueryResult = await db.query(updateQuery,
+			[newValue, this.id]);
+
+		return res;
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
@@ -81,15 +61,9 @@ class VoterDAO extends Voter implements IModel {
 			return new Error("This Voter doesnt exist");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.DELETE,
-				[this.id]);
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during removing Voter");
-		}
+		const res: QueryResult = await db.query(Query.DELETE,
+			[this.id]);
+		return res;
 	}
 
 	public async itExists(): Promise<boolean> {

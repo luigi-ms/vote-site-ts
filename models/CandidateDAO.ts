@@ -20,33 +20,20 @@ class CandidateDAO extends Candidate implements IModel {
 		if((await this.itExists())){
 			return new Error("This Candidate already exist");
 		}
-		try{
-			const res: QueryResult = await db.query(Query.INSERT,
-				[this.name, this.digit, this.age, this.party, this.position]);
+		
+		const res: QueryResult = await db.query(Query.INSERT,
+			[this.name, this.digit, this.age, this.party, this.position]);
 
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during insert Candidate");
-		}
+		return res;
 	}
 
 	public async select(): Promise<QueryResult | Error> {
-		try{
-			const res: QueryResult = await db.query(Query.SELECT,
-				[this.digit]);
+		const res: QueryResult = await db.query(Query.SELECT,
+			[this.digit]);
 			
-			if(res.rowCount > 0){
-			 return res;
-			}else{
-				return new Error("This Candidate does not exist");
-			}
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during select Candidate");
-		}
+		return (res.rowCount > 0)
+			? res
+			: new Error("This Candidate does not exist");
 	}
 
 	public async increaseVotes(): Promise<QueryResult> {
@@ -75,16 +62,10 @@ class CandidateDAO extends Candidate implements IModel {
 			updateQuery = Query.UPDATE.replace(/\$0/, "position");
 		}
 	
-		try{
-			const res: QueryResult = await db.query(updateQuery,
-				[newValue, this.digit]);
+		const res: QueryResult = await db.query(updateQuery,
+			[newValue, this.digit]);
 			
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during update Candidate");
-		}
+		return res;
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
@@ -92,16 +73,10 @@ class CandidateDAO extends Candidate implements IModel {
 			return new Error("This Candidate doesnt exist");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.DELETE,
-				[this.digit]);
+		const res: QueryResult = await db.query(Query.DELETE,
+			[this.digit]);
 			
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during removing Candidate");
-		}
+		return res;
 	}
 
 	public async itExists(): Promise<boolean> {

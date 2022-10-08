@@ -1,4 +1,3 @@
-import { QueryResult } from 'pg';
 import express, { Router, Request, Response } from 'express';
 import VotingActions from '../actions/VotingActions';
 
@@ -8,11 +7,11 @@ voting.post<{}, any, { voterID: number, candidateDigit: number }>('/vote/', (req
 	const { voterID, candidateDigit } = req.body;
 
 	VotingActions.vote(voterID, candidateDigit)
-		.then((resolved: Array<any> | Error) => {
+		.then((resolved: string | Error) => {
 			if(resolved instanceof Error){
 				res.status(500).json({ error: resolved.message });
 			}else{
-				res.status(200).json({ success: "You voted" })
+				res.status(200).json({ success: resolved })
 			}
 		})
 		.catch((rejected: Error) => {

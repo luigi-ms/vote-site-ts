@@ -21,50 +21,28 @@ class PartyDAO extends Party implements IModel {
 			return new Error("This Party already exists");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.INSERT,
-				[this.fullName, this.initials]);
+		const res: QueryResult = await db.query(Query.INSERT,
+			[this.fullName, this.initials]);
 
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during insert Party");
-		}
+		return res;
 	}
 
 	public async select(): Promise<QueryResult | Error> {
-		try{
-			const res: QueryResult = await db.query(Query.SELECT_BY_ID,
-				[this.id]);
+		const res: QueryResult = await db.query(Query.SELECT_BY_ID,
+			[this.id]);
 	
-			if(res.rowCount > 0){
-				return res;
-			}else{
-				return new Error("This party does not exists");
-			}
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during select Party");
-		}
+		return (res.rowCount > 0)
+			? res
+			: new Error("This party does not exists");
 	}
 
 	public async selectByFullName(): Promise<QueryResult | Error> {
-		try{
-			const res: QueryResult = await db.query(Query.SELECT_BY_FULLNAME,
-				[this.fullName]);
+		const res: QueryResult = await db.query(Query.SELECT_BY_FULLNAME,
+			[this.fullName]);
 	
-			if(res.rowCount > 0){
-				return res;
-			}else{
-				return new Error("This party does not exists");
-			}
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during select Party");
-		}
+		return (res.rowCount > 0)
+			? res
+			: new Error("This party does not exists");
 	}
 
 	public async update(field: string, newValue: string): Promise<QueryResult | Error> {
@@ -81,17 +59,11 @@ class PartyDAO extends Party implements IModel {
 		}else if(field === 'initials'){
 			updateQuery = Query.UPDATE.replace(/\$0/, "initials");
 		}
-			
-		try{
-			const res: QueryResult = await db.query(updateQuery,
-				[newValue, this.id]);
+		
+		const res: QueryResult = await db.query(updateQuery,
+			[newValue, this.id]);
 
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during update Party");
-		}
+		return res;
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
@@ -99,24 +71,17 @@ class PartyDAO extends Party implements IModel {
 			return new Error("This Party doesnt exist");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.DELETE,
-				[this.id]);
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during removing Party");
-		}
+		const res: QueryResult = await db.query(Query.DELETE,
+			[this.id]);
+
+		return res;
 	}
 
 	public async itExists(): Promise<boolean> {
 		const foundId = await this.select();
 		const foundName = await this.selectByFullName();
 
-		return ((foundId instanceof Error) === false || (foundName instanceof Error) === false) 
-			? true
-			: false;
+		return ((foundId instanceof Error) === false || (foundName instanceof Error) === false);
 	}
 }
 

@@ -3,7 +3,7 @@ import VoterDAO from '../models/VoterDAO';
 import CandidateDAO from '../models/CandidateDAO';
 
 class VotingActions {
-	static async vote(voterId: number, candidateDigit: number): Promise<any | Error> {
+	static async vote(voterId: number, candidateDigit: number): Promise<string | Error> {
 		const voter = new VoterDAO(),
 					cand = new CandidateDAO();
 
@@ -19,8 +19,12 @@ class VotingActions {
 		try{
 			const voterRes = await voter.update('voted_yet', true),
 				candRes = await cand.increaseVotes();
-
-			return Promise.resolve([voterRes, candRes]);
+			
+			if((voterRes instanceof Error) || (candRes.rowCount === 0)){
+				return Promise.reject("Unable tp vote");
+			}else{
+				return Promise.resolve("Thanks for voting!");
+			}
 		}catch(err){
 			return Promise.reject(err);
 		}

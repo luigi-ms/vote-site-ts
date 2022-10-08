@@ -21,67 +21,39 @@ class PositionDAO extends Position implements IModel {
 			return new Error("This Position already exist");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.INSERT,
-				[this.title]);
+		const res: QueryResult = await db.query(Query.INSERT,
+			[this.title]);
 
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during insert Position");
-		}
+		return res;
 	}
 
 	public async select(): Promise<QueryResult | Error> {
-		try{
-			const res: QueryResult = await db.query(Query.SELECT,
-				[this.id]);
+		const res: QueryResult = await db.query(Query.SELECT,
+			[this.id]);
 	
-			if(res.rowCount > 0){
-				return res;
-			}else{
-				return new Error("This position does not exists");
-			}
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during select Position");
-		}
+		return (res.rowCount > 0)
+			? res
+			: new Error("This position does not exists");
 	}
 
 	public async selectByTitle(): Promise<QueryResult | Error> {
-		try{
-			const res: QueryResult = await db.query(Query.SELECT_BY_TITLE,
-				[this.title]);
+		const res: QueryResult = await db.query(Query.SELECT_BY_TITLE,
+			[this.title]);
 	
-			if(res.rowCount > 0){
-				return res;
-			}else{
-				return new Error("This position does not exists");
-			}
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during select Position");
-		}
+		return (res.rowCount > 0)
+			? res
+			: new Error("This position does not exists");
 	}
-
 
 	public async update(newValue: string): Promise<QueryResult | Error> {
 		if((await this.idExists()) === false){
 			return new Error("This Position doesnt exist");
 		}
 		
-		try{
-			const res: QueryResult = await db.query(Query.UPDATE,
-				[newValue, this.id]);
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during update Position");
-		}
+		const res: QueryResult = await db.query(Query.UPDATE,
+			[newValue, this.id]);
+
+		return res;
 	}
 
 	public async remove(): Promise<QueryResult | Error> {
@@ -89,15 +61,10 @@ class PositionDAO extends Position implements IModel {
 			return new Error("This Position doesnt exist");
 		}
 
-		try{
-			const res: QueryResult = await db.query(Query.DELETE,
-				[this.id]);
-			return res;
-		}catch(err: unknown){
-			return (err instanceof Error)
-				? new Error(err.stack)
-				: new Error("Some Error during removing Position");
-		}
+		const res: QueryResult = await db.query(Query.DELETE,
+			[this.id]);
+
+		return res;
 	}
 
 	public async idExists(): Promise<boolean> {
